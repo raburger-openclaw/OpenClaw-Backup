@@ -1,0 +1,50 @@
+{
+  "appName": "VA QC App - V2",
+  "description": "Fixed version with composite Unit Key",
+  "tables": [
+    {
+      "name": "Receiving",
+      "keyColumn": "Unit Key",
+      "columns": [
+        {"name": "Unit Key", "type": "Text", "appFormula": "[QJ No.] & \"-\" & [WG No.]", "isKey": true, "partOfKey": true},
+        {"name": "QJ No.", "type": "Text", "required": true},
+        {"name": "WG No.", "type": "Text", "required": true, "label": true},
+        {"name": "Date", "type": "Date", "initialValue": "TODAY()"},
+        {"name": "Artisan", "type": "Enum", "values": ["Lerato"], "allowOther": true, "autoComplete": true},
+        {"name": "Size", "type": "Text"},
+        {"name": "Body Brand", "type": "Text"},
+        {"name": "Body Type", "type": "Enum", "values": ["Ball", "Butterfly", "Gate", "Plug"]},
+        {"name": "Actuator Brand", "type": "Text"},
+        {"name": "Model No.", "type": "Text"},
+        {"name": "Actuator Type", "type": "Enum", "values": ["Diaphragm", "Rack and Pinion", "Scotch Yolk"]},
+        {"name": "Status", "type": "Enum", "initialValue": "\"Available\"", "values": ["Available", "In Progress", "Complete"]},
+        {"name": "Photo 1", "type": "Image"},
+        {"name": "Photo 2", "type": "Image"},
+        {"name": "Photo 3", "type": "Image"},
+        {"name": "Photo 4", "type": "Image"},
+        {"name": "Photo 5", "type": "Image"},
+        {"name": "Photo 6", "type": "Image"}
+      ]
+    },
+    {
+      "name": "Stripped",
+      "keyColumn": "Row ID",
+      "columns": [
+        {"name": "Row ID", "type": "Text", "initialValue": "UNIQUEID()", "isKey": true},
+        {"name": "Unit Key", "type": "Ref", "refTable": "Receiving", "refKey": "Unit Key", 
+         "validIf": "SELECT(Receiving[Unit Key], [Status] = \"Complete\")", "label": true},
+        {"name": "Date", "type": "Date", "initialValue": "TODAY()"},
+        {"name": "Artisan", "type": "Enum", "values": ["Lerato"], "allowOther": true},
+        {"name": "QJ No.", "appFormula": "[Unit Key].[QJ No.]"},
+        {"name": "WG No.", "appFormula": "[Unit Key].[WG No.]"},
+        {"name": "Size", "appFormula": "[Unit Key].[Size]"},
+        {"name": "Body Brand", "appFormula": "[Unit Key].[Body Brand]"},
+        {"name": "Body Type", "appFormula": "[Unit Key].[Body Type]"},
+        {"name": "Actuator Brand", "appFormula": "[Unit Key].[Actuator Brand]"},
+        {"name": "Model No.", "appFormula": "[Unit Key].[Model No.]"},
+        {"name": "Actuator Type", "appFormula": "[Unit Key].[Actuator Type]"},
+        {"name": "Photo 1-6", "type": "Image"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "DisplayName": "VA QC App - V2",
+  "Description": "Valve Quality Control - Job Number workflow with photo management",
+  "Version": "2.0.0",
+  
+  "Tables": [
+    {
+      "Name": "Valves",
+      "Description": "Master valve registry",
+      "Columns": [
+        {"Name": "Job Number", "Type": "Text", "AppFormula": "[QJ Number]&\"-\"&[WG Number]", "IsKey": true, "Label": true, "Required": true},
+        {"Name": "QJ Number", "Type": "Text", "Required": true},
+        {"Name": "WG Number", "Type": "Text", "Required": true},
+        {"Name": "Date Received", "Type": "Date", "InitialValue": "TODAY()"},
+        {"Name": "Status", "Type": "Enum", "EnumValues": ["Received","In Stripped","In Before Assembly","In Final","Complete"], "InitialValue": "\"Received\"", "Required": true},
+        {"Name": "Artisan", "Type": "Enum", "EnumValues": ["Lerato"], "AllowOtherValues": true},
+        {"Name": "Size", "Type": "Text"},
+        {"Name": "Body Brand", "Type": "Text"},
+        {"Name": "Body Type", "Type": "Enum", "EnumValues": ["Ball","Butterfly","Gate","Plug"]},
+        {"Name": "Actuator Brand", "Type": "Text"},
+        {"Name": "Model Number", "Type": "Text"},
+        {"Name": "Actuator Type", "Type": "Enum", "EnumValues": ["Diaphragm","Rack and Pinion","Scotch Yolk"]},
+        {"Name": "Notes", "Type": "LongText"},
+        {"Name": "Email Sent", "Type": "YesNo", "InitialValue": "false"},
+        {"Name": "Date Completed", "Type": "DateTime"}
+      ]
+    },
+    {
+      "Name": "Stripped",
+      "Description": "Disassembly inspection",
+      "Columns": [
+        {"Name": "Row ID", "Type": "Text", "InitialValue": "UNIQUEID()", "IsKey": true, "Hidden": true},
+        {"Name": "Job Number", "Type": "Ref", "ReferencedTable": "Valves", "ReferencedKeyColumn": "Job Number", "Valid_If": "SELECT(Valves[Job Number],[Status]=\"Received\")", "Label": true, "Required": true},
+        {"Name": "Date", "Type": "Date", "InitialValue": "TODAY()"},
+        {"Name": "Artisan", "Type": "Enum", "EnumValues": ["Lerato"], "AllowOtherValues": true},
+        {"Name": "QJ Number", "Type": "Text", "AppFormula": "[Job Number].[QJ Number]", "ReadOnly": true},
+        {"Name": "Size", "Type": "Text", "AppFormula": "[Job Number].[Size]", "ReadOnly": true},
+        {"Name": "Photo 1", "Type": "Image"},
+        {"Name": "Photo 2", "Type": "Image"},
+        {"Name": "Photo 3", "Type": "Image"},
+        {"Name": "Photo 4", "Type": "Image"},
+        {"Name": "Photo 5", "Type": "Image"},
+        {"Name": "Photo 6", "Type": "Image"},
+        {"Name": "Photo 7", "Type": "Image"},
+        {"Name": "Photo 8", "Type": "Image"},
+        {"Name": "Photo 9", "Type": "Image"},
+        {"Name": "Photo 10", "Type": "Image"},
+        {"Name": "Complete", "Type": "YesNo", "InitialValue": "false"},
+        {"Name": "Notes", "Type": "LongText"}
+      ]
+    },
+    {
+      "Name": "BeforeAssembly",
+      "Description": "Pre-assembly inspection",
+      "Columns": [
+        {"Name": "Row ID", "Type": "Text", "InitialValue": "UNIQUEID()", "IsKey": true, "Hidden": true},
+        {"Name": "Job Number", "Type": "Ref", "ReferencedTable": "Stripped", "ReferencedKeyColumn": "Job Number", "Valid_If": "SELECT(Stripped[Job Number],[Complete]=true)", "Label": true, "Required": true},
+        {"Name": "Date", "Type": "DateTime", "InitialValue": "NOW()"},
+        {"Name": "Artisan", "Type": "Enum", "EnumValues": ["Lerato"], "AllowOtherValues": true},
+        {"Name": "QJ Number", "Type": "Text", "AppFormula": "[Job Number].[QJ Number]", "ReadOnly": true},
+        {"Name": "Photo 1", "Type": "Image"},
+        {"Name": "Photo 2", "Type": "Image"},
+        {"Name": "Photo 3", "Type": "Image"},
+        {"Name": "Photo 4", "Type": "Image"},
+        {"Name": "Photo 5", "Type": "Image"},
+        {"Name": "Photo 6", "Type": "Image"},
+        {"Name": "Complete", "Type": "YesNo", "InitialValue": "false"},
+        {"Name": "Notes", "Type": "LongText"}
+      ]
+    },
+    {
+      "Name": "Final",
+      "Description": "Final inspection",
+      "Columns": [
+        {"Name": "Row ID", "Type": "Text", "InitialValue": "UNIQUEID()", "IsKey": true, "Hidden": true},
+        {"Name": "Job Number", "Type": "Ref", "ReferencedTable": "BeforeAssembly", "ReferencedKeyColumn": "Job Number", "Valid_If": "SELECT(BeforeAssembly[Job Number],[Complete]=true)", "Label": true, "Required": true},
+        {"Name": "Date", "Type": "DateTime", "InitialValue": "NOW()"},
+        {"Name": "QJ Number", "Type": "Text", "AppFormula": "[Job Number].[QJ Number]", "ReadOnly": true},
+        {"Name": "Photo 1", "Type": "Image"},
+        {"Name": "Photo 2", "Type": "Image"},
+        {"Name": "Photo 3", "Type": "Image"},
+        {"Name": "Photo 4", "Type": "Image"},
+        {"Name": "Photo 5", "Type": "Image"},
+        {"Name": "Photo 6", "Type": "Image"},
+        {"Name": "Complete", "Type": "YesNo", "InitialValue": "false"},
+        {"Name": "Notes", "Type": "LongText"},
+        {"Name": "Send Email", "Type": "Show", "Content": "\"Tap to send completion email to Gideon\""}
+      ]
+    }
+  ],
+  
+  "Views": [
+    {"Name": "Valves", "Type": "table", "Position": "left most", "SourceTable": "Valves"},
+    {"Name": "Stripped", "Type": "table", "Position": "left", "SourceTable": "Stripped"},
+    {"Name": "BeforeAssembly", "Type": "table", "Position": "center", "SourceTable": "BeforeAssembly"},
+    {"Name": "Final", "Type": "table", "Position": "right most", "SourceTable": "Final"},
+    {"Name": "Completed Valves", "Type": "table", "Position": "menu", "SourceTable": "Valves", "Slice": "Complete"}
+  ],
+  
+  "Slices": [
+    {"Name": "Complete", "SourceTable": "Valves", "Filter": "[Status]=\"Complete\""}
+  ],
+  
+  "Actions": [
+    {"Name": "Send to Gideon", "DoThis": "Data: execute an action on a set of rows", "Settings": {"ActionToInvoke": "Email Report"}, "Prominence": "Display prominently"}
+  ]
+}
