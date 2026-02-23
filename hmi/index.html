@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lara HMI Interface</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh; color: #fff;
+        }
+        .container { 
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 350px 1fr;
+            gap: 30px; height: 100vh;
+        }
+        .avatar-panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px; padding: 30px;
+            display: flex; flex-direction: column;
+            align-items: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .avatar-container {
+            position: relative; width: 280px; height: 280px;
+            border-radius: 50%; overflow: hidden;
+            border: 4px solid #00d4ff;
+            box-shadow: 0 0 40px rgba(0,212,255,0.3);
+            margin-bottom: 20px;
+        }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .status-ring {
+            position: absolute; bottom: 10px; right: 10px;
+            width: 30px; height: 30px; background: #00ff88;
+            border-radius: 50%; border: 3px solid #1a1a2e;
+            box-shadow: 0 0 10px #00ff88; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .name { font-size: 32px; font-weight: 700; margin-bottom: 5px; }
+        .role { font-size: 14px; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+        .info-cards { width: 100%; margin-top: 20px; }
+        .info-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 15px; margin-bottom: 10px;
+        }
+        .info-card-label { font-size: 11px; color: rgba(255,255,255,0.5); }
+        .info-card-value { font-size: 14px; }
+        .chat-panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px; display: flex;
+            flex-direction: column; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .chat-header {
+            padding: 25px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .connection-status { display: flex; align-items: center; gap: 8px; }
+        .messages { 
+            flex: 1; padding: 25px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .message { max-width: 80%; padding: 18px; border-radius: 18px; }
+        .message.user { align-self: flex-end; background: #00d4ff; }
+        .message.lara { align-self: flex-start; background: rgba(255,255,255,0.1); }
+        .message-time { font-size: 11px; opacity: 0.6; margin-top: 8px; text-align: right; }
+        .input-area { padding: 25px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 15px; }
+        .input-field {
+            flex: 1; background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+            padding: 15px 20px; color: #fff; font-size: 15px;
+        }
+        .send-btn {
+            background: #00d4ff; border: none; border-radius: 12px;
+            padding: 15px 30px; color: #fff; font-weight: 600; cursor: pointer;
+        }
+        .connected { color: #00ff88; }
+        .disconnected { color: #ff4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="avatar-panel">
+            <div class="avatar-container">
+                <img src="../avatars/lara.jpg" alt="Lara" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%2300d4ff%22/></svg>'">
+                <div class="status-ring" id="statusRing"></div>
+            </div>
+            <div class="name">Lara</div>
+            <div class="role">Digital Assistant</div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-card-label">Connection</div>
+                    <div class="info-card-value" id="connStatus">Connecting...</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-label">Connected Services</div>
+                    <div class="info-card-value">Gmail, Calendar, Drive, Telegram</div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-panel">
+            <div class="chat-header">
+                <h2>Command Interface</h2>
+                <div class="connection-status" id="chatStatus">
+                    <span>●</span> <span id="statusText">Connecting</span>
+                </div>
+            </div>
+            <div class="messages" id="messages">
+                <div class="message lara">Hi! I'm Lara. Send me a message!</div>
+            </div>
+            <div class="input-area">
+                <input type="text" class="input-field" id="input" placeholder="Type your instruction...">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    // Get host from URL - automatically works locally or remote
+    const wsHost = window.location.hostname;
+    const wsUrl = `ws://${wsHost}:8091`;
+    const ws = new WebSocket(wsUrl);
+    
+    ws.onopen = function() {
+        document.getElementById('connStatus').textContent = 'Connected';
+        document.getElementById('statusText').textContent = 'Connected';
+        document.getElementById('chatStatus').className = 'connection-status connected';
+        document.getElementById('statusRing').style.background = '#00ff88';
+    };
+    
+    ws.onclose = function() {
+        document.getElementById('connStatus').textContent = 'Disconnected';
+        document.getElementById('statusText').textContent = 'Disconnected';
+        document.getElementById('chatStatus').className = 'connection-status disconnected';
+        document.getElementById('statusRing').style.background = '#ff4444';
+    };
+    
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.type === 'response') {
+            addMessage(data.data.text || 'Response from Lara', 'lara');
+        } else if (data.type === 'system') {
+            addMessage(data.message, 'lara');
+        }
+    };
+    
+    function sendMessage() {
+        const input = document.getElementById('input');
+        const text = input.value.trim();
+        if (!text) return;
+        
+        addMessage(text, 'user');
+        
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({type: 'chat', text: text}));
+        } else {
+            addMessage('Error: WebSocket not connected', 'lara');
+        }
+        
+        input.value = '';
+    }
+    
+    function addMessage(text, sender) {
+        const messages = document.getElementById('messages');
+        const msg = document.createElement('div');
+        msg.className = 'message ' + sender;
+        const time = new Date().toLocaleTimeString();
+        msg.innerHTML = text + '<div class="message-time">' + time + '</div>';
+        messages.appendChild(msg);
+        messages.scrollTop = messages.scrollHeight;
+    }
+    
+    document.getElementById('input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+    </script>
+</body>
+</html>
