@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Valve {{ job_number }} - {{ app_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.section-title { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #667eea; }
+.readonly-field { background: #f5f5f5; color: #666; cursor: not-allowed; }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/valve/{{ job_number }}" class="btn btn-secondary" style="margin-bottom:16px;">← Back to Valve</a>
+
+<div class="card">
+    <h2 style="margin-bottom: 24px; font-size: 24px;">Edit Valve {{ job_number }}</h2>
+    
+    {% if valve %}
+    <form method="post" action="/valve/{{ job_number }}/edit">
+        <div class="form-grid">
+            <div>
+                <h3 class="section-title">Job Numbers (Read Only)</h3>
+                <div class="form-group">
+                    <label for="qj_number">QJ Number</label>
+                    <input type="text" id="qj_number" value="{{ valve.get('QJ Number', '') }}" class="readonly-field" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="wg_number">WG Number</label>
+                    <input type="text" id="wg_number" value="{{ valve.get('WG Number', '') }}" class="readonly-field" readonly>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="section-title">Valve Body</h3>
+                <div class="form-group">
+                    <label for="body_brand">Body Brand</label>
+                    <input type="text" id="body_brand" name="body_brand" value="{{ valve.get('Body Brand', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="body_type">Body Type</label>
+                    <select id="body_type" name="body_type" required>
+                        <option value="Ball" {% if valve.get('Body Type') == 'Ball' %}selected{% endif %}>Ball</option>
+                        <option value="Butterfly" {% if valve.get('Body Type') == 'Butterfly' %}selected{% endif %}>Butterfly</option>
+                        <option value="Gate" {% if valve.get('Body Type') == 'Gate' %}selected{% endif %}>Gate</option>
+                        <option value="Plug" {% if valve.get('Body Type') == 'Plug' %}selected{% endif %}>Plug</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="section-title">Actuator</h3>
+                <div class="form-group">
+                    <label for="actuator_brand">Actuator Brand</label>
+                    <input type="text" id="actuator_brand" name="actuator_brand" value="{{ valve.get('Actuator Brand', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="actuator_type">Actuator Type</label>
+                    <select id="actuator_type" name="actuator_type" required>
+                        <option value="Diaphragm" {% if valve.get('Actuator Type') == 'Diaphragm' %}selected{% endif %}>Diaphragm</option>
+                        <option value="Rack and Pinion" {% if valve.get('Actuator Type') == 'Rack and Pinion' %}selected{% endif %}>Rack and Pinion</option>
+                        <option value="Scotch Yolk" {% if valve.get('Actuator Type') == 'Scotch Yolk' %}selected{% endif %}>Scotch Yolk</option>
+                        <option value="Piston" {% if valve.get('Actuator Type') == 'Piston' %}selected{% endif %}>Piston</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="model_number">Model Number</label>
+                    <input type="text" id="model_number" name="model_number" value="{{ valve.get('Model Number', '') }}">
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="section-title">Details</h3>
+                <div class="form-group">
+                    <label for="size">Size</label>
+                    <input type="text" id="size" name="size" value="{{ valve.get('Size', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="artisan">Assigned Artisan</label>
+                    <select id="artisan" name="artisan" required>
+                        {% for a in artisans %}
+                        <option value="{{ a }}" {% if valve.get('Artisan') == a %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status" required>
+                        {% for s in statuses %}
+                        <option value="{{ s }}" {% if valve.get('Status') == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 24px;">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="4">{{ valve.get('Notes', '') }}</textarea>
+        </div>
+        
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
+            <button type="submit" class="btn">Save Changes</button>
+            <a href="/valve/{{ job_number }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+    {% else %}
+    <div class="text-center" style="padding: 40px 20px;">
+        <h3>Valve Not Found</h3>
+        <p>Could not find valve {{ job_number }}</p>
+        <a href="/dashboard" class="btn">Back to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Receiving - Valve {{ job_number }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<a href="/valve/{{ job_number }}" class="btn btn-secondary" style="margin-bottom:16px;">← Back to Valve</a>
+
+<div class="card">
+    <h2>📥 Receiving - Valve {{ job_number }}</h2>
+    
+    {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+    {% endif %}
+    
+    {% if receiving %}
+    <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+        <strong>Status:</strong> {{ 'Complete' if receiving.get('Complete') == 'true' else 'Pending Review' }}
+        {% if receiving.get('Artisan') %}
+        | Captured by: {{ receiving.get('Artisan') }}
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <form method="post" action="/valve/{{ job_number }}/receiving">
+        <!-- Capture Form - All Users Can See This -->
+        <h3>Capture Photos (Up to 10)</h3>
+        <p style="color: #666; margin-bottom: 16px;">Take photos of the valve as received (body, actuator, nameplate, damage if any).</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+            <div class="form-group">
+                <label>Photo 1</label>
+                <input type="file" name="photo_1" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 2</label>
+                <input type="file" name="photo_2" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 3</label>
+                <input type="file" name="photo_3" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 4</label>
+                <input type="file" name="photo_4" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 5</label>
+                <input type="file" name="photo_5" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 6</label>
+                <input type="file" name="photo_6" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 7</label>
+                <input type="file" name="photo_7" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 8</label>
+                <input type="file" name="photo_8" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 9</label>
+                <input type="file" name="photo_9" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="form-group">
+                <label>Photo 10</label>
+                <input type="file" name="photo_10" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 24px;">
+            <label for="notes">Notes</label>
+            <textarea name="notes" id="notes" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="Describe condition, packaging, any visible damage...">{{ receiving.get('Notes', '') if receiving else '' }}</textarea>
+        </div>
+        
+        <!-- Submit buttons -->
+        <div style="margin-top: 24px; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+            <button type="submit" name="action" value="save" class="btn">Save Changes</button>
+            <a href="/valve/{{ job_number }}" class="btn btn-secondary">Cancel</a>
+        </div>
+        
+        <!-- Approval Section - Only for Managers/Admin -->
+        {% if user.role in ['manager', 'admin'] %}
+        <h3>Manager Review</h3>
+        
+        {% if receiving %}
+            <div class="form-group">
+                <label for="manager_notes">Manager Notes</label>
+                <textarea name="manager_notes" id="manager_notes" rows="3" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="Add review notes...">{{ receiving.get('Manager Notes', '') }}</textarea>
+            </div>
+            
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                {% if receiving.get('Complete') != 'true' %}
+                <button type="submit" name="action" value="approve" class="btn" style="background: #4caf50;">✓ Approve & Continue to Stripped</button>
+                <button type="submit" name="action" value="reject" class="btn btn-secondary" style="background: #f44336; color: white;">✗ Reject</button>
+                {% else %}
+                <span style="color: #4caf50; font-weight: 600;">✓ Already Approved</span>
+                {% endif %}
+            </div>
+        {% else %}
+            <p style="color: #666;">No data captured yet. Capture form above, then approve.</p>
+        {% endif %}
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

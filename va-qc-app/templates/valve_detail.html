@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Valve {{ job_number }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<a href="/dashboard" class="btn btn-secondary" style="margin-bottom:16px;">← Back to Dashboard</a>
+
+{% if valve %}
+<div class="card" style="margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h1>Valve {{ valve['Job Number'] }}</h1>
+            <p style="color:#666;">{{ valve.get('Body Brand', '') }} {{ valve.get('Body Type', '') }} | {{ valve.get('Size', '') }}</p>
+            <p>QJ: {{ valve.get('QJ Number', '-') }} | WG: {{ valve.get('WG Number', '-') }}</p>
+            <span class="status-badge">{{ valve.get('Status', 'Received') }}</span>
+        </div>
+        <a href="/valve/{{ job_number }}/edit" class="btn">✏️ Edit Valve</a>
+    </div>
+</div>
+
+<div class="details-grid">
+    <div class="card detail-card">
+        <h3>Body</h3>
+        <div class="detail-row"><span>Brand</span><span class="value">{{ valve.get('Body Brand', '-') }}</span></div>
+        <div class="detail-row"><span>Type</span><span class="value">{{ valve.get('Body Type', '-') }}</span></div>
+    </div>
+    <div class="card detail-card">
+        <h3>Actuator</h3>
+        <div class="detail-row"><span>Brand</span><span class="value">{{ valve.get('Actuator Brand', '-') }}</span></div>
+        <div class="detail-row"><span>Type</span><span class="value">{{ valve.get('Actuator Type', '-') }}</span></div>
+        <div class="detail-row"><span>Model</span><span class="value">{{ valve.get('Model Number', '-') }}</span></div>
+    </div>
+    <div class="card detail-card">
+        <h3>Details</h3>
+        <div class="detail-row"><span>Date Received</span><span class="value">{{ valve.get('Date Received', '-') }}</span></div>
+        <div class="detail-row"><span>Artisan</span><span class="value">{{ valve.get('Artisan', '-') }}</span></div>
+    </div>
+</div>
+
+{% if valve.get('Notes') %}
+<div class="card" style="margin-top: 24px;">
+    <h3>Notes</h3>
+    <p style="color: #333; line-height: 1.6;">{{ valve['Notes'] }}</p>
+</div>
+{% endif %}
+
+<h2 style="margin-bottom: 16px; font-size: 20px; margin-top: 24px;">Stages</h2>
+<div class="stages">
+    <div class="card">
+        <div class="stage-card">
+            <h3>📥 Receiving</h3>
+        </div>
+        <p style="color:#666; font-size: 14px; margin-top: 8px;">Initial valve documentation and photos when valve arrives.</p>
+        <a href="/valve/{{ job_number }}/receiving" class="btn" style="margin-top: 12px;">View / Edit</a>
+    </div>
+
+    <div class="card">
+        <div class="stage-card">
+            <h3>🔧 Stripped</h3>
+        </div>
+        <p style="color:#666; font-size: 14px; margin-top: 8px;">Post-disassembly inspection photos.</p>
+        <a href="/valve/{{ job_number }}/stripped" class="btn" style="margin-top: 12px;">View / Edit</a>
+    </div>
+
+    <div class="card">
+        <div class="stage-card">
+            <h3>📋 Before Assembly</h3>
+        </div>
+        <p style="color:#666; font-size: 14px; margin-top: 8px;">Pre-assembly inspection and parts check.</p>
+        <a href="/valve/{{ job_number }}/before-assembly" class="btn" style="margin-top: 12px;">View / Edit</a>
+    </div>
+
+    <div class="card">
+        <div class="stage-card">
+            <h3>✅ Final</h3>
+        </div>
+        <p style="color:#666; font-size: 14px; margin-top: 8px;">Final inspection and testing before delivery.</p>
+        <a href="/valve/{{ job_number }}/final" class="btn" style="margin-top: 12px;">View / Edit</a>
+    </div>
+</div>
+
+{% else %}
+<div class="card text-center" style="padding: 60px 20px;">
+    <h2 style="margin-bottom: 12px; color: #333;">Valve Not Found</h2>
+    <p style="color: #666; margin-bottom: 24px;">Job number {{ job_number }} could not be found.</p>
+    <a href="/dashboard" class="btn">Back to Dashboard</a>
+</div>
+{% endif %}
+{% endblock %}
