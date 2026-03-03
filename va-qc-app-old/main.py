@@ -115,8 +115,8 @@ async def dashboard(request: Request, user: dict = Depends(require_login)):
         "error": error_msg
     })
 
-@app.get("/valve/new", response_class=HTMLResponse)
-async def new_valve_form(request: Request, user: dict = Depends(require_login)):
+    @app.get("/valve/new", response_class=HTMLResponse)
+    async def new_valve_form(request: Request, user: dict = Depends(require_login)):
     """Show new valve form"""
     return templates.TemplateResponse("valve_form.html", {
         "request": request,
@@ -126,8 +126,8 @@ async def new_valve_form(request: Request, user: dict = Depends(require_login)):
         "statuses": STATUSES
     })
 
-@app.post("/valve/new")
-async def create_valve(
+    @app.post("/valve/new")
+    async def create_valve(
     request: Request,
     qj_number: str = Form(...),
     wg_number: str = Form(...),
@@ -140,7 +140,7 @@ async def create_valve(
     artisan: str = Form(...),
     notes: str = Form(""),
     user: dict = Depends(require_login)
-):
+    ):
     """Create new valve"""
     try:
         store = ValveDataStore()
@@ -180,8 +180,8 @@ async def create_valve(
             "error": f"Error: {str(e)}"
         })
 
-@app.get("/valve/{job_number}", response_class=HTMLResponse)
-async def valve_detail(request: Request, job_number: str, user: dict = Depends(require_login)):
+    @app.get("/valve/{job_number}", response_class=HTMLResponse)
+    async def valve_detail(request: Request, job_number: str, user: dict = Depends(require_login)):
     """Single valve detail view"""
     try:
         store = ValveDataStore()
@@ -198,8 +198,8 @@ async def valve_detail(request: Request, job_number: str, user: dict = Depends(r
         "app_name": APP_NAME
     })
 
-@app.get("/valve/{job_number}/edit", response_class=HTMLResponse)
-async def edit_valve_form(request: Request, job_number: str, user: dict = Depends(require_login)):
+    @app.get("/valve/{job_number}/edit", response_class=HTMLResponse)
+    async def edit_valve_form(request: Request, job_number: str, user: dict = Depends(require_login)):
     """Show edit valve form"""
     try:
         store = ValveDataStore()
@@ -217,8 +217,8 @@ async def edit_valve_form(request: Request, job_number: str, user: dict = Depend
         "statuses": STATUSES
     })
 
-@app.post("/valve/{job_number}/edit")
-async def update_valve(
+    @app.post("/valve/{job_number}/edit")
+    async def update_valve(
     request: Request,
     job_number: str,
     body_brand: str = Form(...),
@@ -231,7 +231,7 @@ async def update_valve(
     status: str = Form(...),
     notes: str = Form(""),
     user: dict = Depends(require_login)
-):
+    ):
     """Update existing valve"""
     try:
         store = ValveDataStore()
@@ -271,8 +271,8 @@ async def update_valve(
             "error": f"Error: {str(e)}"
         })
 
-@app.get("/valve/{job_number}/receiving", response_class=HTMLResponse)
-async def receiving_form(request: Request, job_number: str, user: dict = Depends(require_login)):
+    @app.get("/valve/{job_number}/receiving", response_class=HTMLResponse)
+    async def receiving_form(request: Request, job_number: str, user: dict = Depends(require_login)):
     """Show receiving form for valve"""
     try:
         store = ValveDataStore()
@@ -291,8 +291,8 @@ async def receiving_form(request: Request, job_number: str, user: dict = Depends
         "app_name": APP_NAME
     })
 
-@app.post("/valve/{job_number}/receiving")
-async def save_receiving(
+    @app.post("/valve/{job_number}/receiving")
+    async def save_receiving(
     request: Request,
     job_number: str,
     notes: str = Form(""),
@@ -309,7 +309,7 @@ async def save_receiving(
     photo_9: UploadFile = File(None),
     photo_10: UploadFile = File(None),
     user: dict = Depends(require_login)
-):
+    ):
     """Save receiving data with photo uploads or handle manager approval"""
     try:
         from google_drive import GoogleDriveClient
@@ -400,11 +400,11 @@ async def save_receiving(
             "error": f"Error: {str(e)}"
         })
 
-@app.get("/api/health")
-async def health_check():
+    @app.get("/api/health")
+    async def health_check():
     """Health check endpoint"""
     return {"status": "ok", "version": "1.0.0", "phase": 2}
 
-if __name__ == "__main__":
+    if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

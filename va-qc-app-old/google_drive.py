@@ -17,8 +17,13 @@ SCOPES = [
 
 SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(__file__), 'service-account.json')
 
-# Root folder for all valve photos in Drive
+# Shared folder for all valve photos in Drive
+# This folder must be created in YOUR Drive and shared with the service account
 PARENT_FOLDER_NAME = "VulcanArc ValveQC Photos"
+
+# If you have the shared folder ID, set it here:
+# Folder ID for "VA QC V2 - Valve Tracking - Photos" (shared with service account)
+SHARED_FOLDER_ID = os.getenv("SHARED_FOLDER_ID", "1XZ0qLeiMwZgnpydaMN2WTtbaw-6R_ebc")
 
 
 class GoogleDriveClient:
@@ -42,27 +47,33 @@ class GoogleDriveClient:
         self.service = build('drive', 'v3', credentials=creds)
     
     def _ensure_parent_folder(self):
-        """Ensure the root ValveQC folder exists"""
+        """Find the shared ValveQC folder (must be shared with service account)"""
         try:
-            # Search for existing folder
+            # Option 1: Use explicit folder ID from env
+            if SHARED_FOLDER_ID:
+                self.parent_folder_id = SHARED_FOLDER_ID
+                print(f"Using shared folder ID from config: {SHARED_FOLDER_ID}")
+                return
+            
+            # Option 2: Search for folder shared with service account
+            # Service accounts can access files shared with them
             results = self.service.files().list(
                 q=f"name='{PARENT_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false",
                 spaces='drive',
-                fields='files(id, name)'
+                fields='files(id, name, shared, owners)'
             ).execute()
             
             files = results.get('files', [])
             if files:
                 self.parent_folder_id = files[0]['id']
+                print(f"Found shared folder: {PARENT_FOLDER_NAME} ({self.parent_folder_id})")
             else:
-                # Create folder
-                folder_metadata = {
-                    'name': PARENT_FOLDER_NAME,
-                    'mimeType': 'application/vnd.google-apps.folder'
-                }
-                folder = self.service.files().create(body=folder_metadata, fields='id').execute()
-                self.parent_folder_id = folder['id']
-                print(f"Created Drive folder: {PARENT_FOLDER_NAME} ({self.parent_folder_id})")
+                # Can't create - service account has no storage
+                print(f"ERROR: Shared folder '{PARENT_FOLDER_NAME}' not found!")
+                print(f"Create this folder in YOUR Google Drive and share it with:")
+                print(f"  va-qc-app@va-qc-app.iam.gserviceaccount.com")
+                print(f"Or set SHARED_FOLDER_ID environment variable")
+                self.parent_folder_id = None
                 
         except Exception as e:
             print(f"ERROR ensuring parent folder: {e}")

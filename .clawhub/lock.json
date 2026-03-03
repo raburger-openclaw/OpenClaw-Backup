@@ -4,6 +4,18 @@
     "wacli": {
       "version": "1.0.0",
       "installedAt": 1771458003866
+    },
+    "self-improving-agent": {
+      "version": "1.0.11",
+      "installedAt": 1772398119785
+    },
+    "agent-browser": {
+      "version": "0.2.0",
+      "installedAt": 1772398922312
+    },
+    "proactive-agent-skill": {
+      "version": "1.0.0",
+      "installedAt": 1772458516829
     }
   }
 }

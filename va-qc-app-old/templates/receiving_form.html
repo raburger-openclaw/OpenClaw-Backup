@@ -5,27 +5,57 @@
 {% block content %}
 <a href="/valve/{{ job_number }}" class="btn btn-secondary" style="margin-bottom:16px;">← Back to Valve</a>
 
-<div class="card">
-    <h2>📥 Receiving - Valve {{ job_number }}</h2>
-    
-    {% if error %}
-    <div class="alert alert-error">{{ error }}</div>
-    {% endif %}
-    
-    {% if receiving %}
-    <div style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
-        <strong>Status:</strong> {{ 'Complete' if receiving.get('Complete') == 'true' else 'Pending Review' }}
-        {% if receiving.get('Artisan') %}
-        | Captured by: {{ receiving.get('Artisan') }}
-        {% endif %}
+<div class="card" style="margin-bottom: 24px;">
+    <h1>{{ valve.get('QJ Number', '') }}-{{ valve.get('WG Number', '') }}</h1>
+    <span class="status-badge">{{ valve.get('Status', 'Received') }}</span>
+</div>
+
+<div class="details-grid">
+    <div class="card detail-card">
+        <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">Valve Information</h3>
+        <div class="detail-row"><strong>QJ Number:</strong> <span>{{ valve.get('QJ Number', '-') }}</span></div>
+        <div class="detail-row"><strong>WG Number:</strong> <span>{{ valve.get('WG Number', '-') }}</span></div>
     </div>
-    {% endif %}
-    
-    <form method="post" action="/valve/{{ job_number }}/receiving">
-        <!-- Capture Form - All Users Can See This -->
-        <h3>Capture Photos (Up to 10)</h3>
-        <p style="color: #666; margin-bottom: 16px;">Take photos of the valve as received (body, actuator, nameplate, damage if any).</p>
-        
+
+    <div class="card detail-card">
+        <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">Body Information</h3>
+        <div class="detail-row"><strong>Body Size:</strong> <span>{{ valve.get('Size', '-') }}</span></div>
+        <div class="detail-row"><strong>Body Brand:</strong> <span>{{ valve.get('Body Brand', '-') }}</span></div>
+        <div class="detail-row"><strong>Body Type:</strong> <span>{{ valve.get('Body Type', '-') }}</span></div>
+    </div>
+
+    <div class="card detail-card">
+        <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">Actuator Information</h3>
+        <div class="detail-row"><strong>Actuator Brand:</strong> <span>{{ valve.get('Actuator Brand', '-') }}</span></div>
+        <div class="detail-row"><strong>Actuator Model:</strong> <span>{{ valve.get('Model Number', '-') }}</span></div>
+        <div class="detail-row"><strong>Actuator Type:</strong> <span>{{ valve.get('Actuator Type', '-') }}</span></div>
+    </div>
+</div>
+
+{% if error %}
+<div class="card" style="border-color: #f44336;">
+    <div class="alert alert-error">{{ error }}</div>
+</div>
+{% endif %}
+
+{% if receiving and receiving.get('Photo 1') %}
+<div class="card" style="margin-top: 24px;">
+    <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">📷 Current Photos</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;">
+        {% for key in ['Photo 1', 'Photo 2', 'Photo 3', 'Photo 4', 'Photo 5', 'Photo 6', 'Photo 7', 'Photo 8', 'Photo 9', 'Photo 10'] %}
+            {% if receiving.get(key) %}
+            <a href="{{ receiving.get(key) }}" target="_blank" style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; display: block;">
+                <img src="{{ receiving.get(key) }}" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+            </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 24px;">
+    <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">📝 Capture/Replace Photos (Up to 10)</h3>
+    <form method="post" action="/valve/{{ job_number }}/receiving" enctype="multipart/form-data">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
             <div class="form-group">
                 <label>Photo 1</label>
@@ -68,40 +98,24 @@
                 <input type="file" name="photo_10" accept="image/*" capture="environment" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;">
             </div>
         </div>
-        
+
         <div class="form-group" style="margin-top: 24px;">
             <label for="notes">Notes</label>
             <textarea name="notes" id="notes" rows="4" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="Describe condition, packaging, any visible damage...">{{ receiving.get('Notes', '') if receiving else '' }}</textarea>
         </div>
-        
-        <!-- Submit buttons -->
-        <div style="margin-top: 24px; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+
+        <div style="margin-top: 24px; display: flex; gap: 12px;">
             <button type="submit" name="action" value="save" class="btn">Save Changes</button>
             <a href="/valve/{{ job_number }}" class="btn btn-secondary">Cancel</a>
         </div>
-        
-        <!-- Approval Section - Only for Managers/Admin -->
+
         {% if user.role in ['manager', 'admin'] %}
-        <h3>Manager Review</h3>
-        
-        {% if receiving %}
+        <div class="card" style="margin-top: 24px; margin-bottom: 16px;">
+            <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px; margin-bottom: 16px;">Manager Review</h3>
             <div class="form-group">
                 <label for="manager_notes">Manager Notes</label>
-                <textarea name="manager_notes" id="manager_notes" rows="3" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="Add review notes...">{{ receiving.get('Manager Notes', '') }}</textarea>
+                <textarea name="manager_notes" id="manager_notes" rows="3" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;" placeholder="Add review notes...">{{ receiving.get('Manager Notes', '') if receiving else '' }}</textarea>
             </div>
-            
-            <div style="margin-top: 24px; display: flex; gap: 12px;">
-                {% if receiving.get('Complete') != 'true' %}
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
                 <button type="submit" name="action" value="approve" class="btn" style="background: #4caf50;">✓ Approve & Continue to Stripped</button>
-                <button type="submit" name="action" value="reject" class="btn btn-secondary" style="background: #f44336; color: white;">✗ Reject</button>
-                {% else %}
-                <span style="color: #4caf50; font-weight: 600;">✓ Already Approved</span>
-                {% endif %}
-            </div>
-        {% else %}
-            <p style="color: #666;">No data captured yet. Capture form above, then approve.</p>
-        {% endif %}
-        {% endif %}
-    </form>
-</div>
-{% endblock %}
+                <button type="submit"

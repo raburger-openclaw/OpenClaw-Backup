@@ -1,0 +1,72 @@
+{
+  "agents": [
+    { "id": "main", "name": "Lara", "default": true },
+    { "id": "geek", "name": "Geek" },
+    { "id": "swen", "name": "Swen" },
+    { "id": "madison", "name": "Madison" }
+  ],
+  "telegram": {
+    "main": {
+      "bot": "@robertburgerbot",
+      "botId": "8592080406",
+      "token": "8592080406:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "routesTo": "Lara (main)",
+      "webhook": "/webhook/telegram"
+    },
+    "accounts": {
+      "geek": {
+        "bot": "@Robgeekbot",
+        "token": "8617922962:AAE1Z0142dq4-jne5sabgav_6GEtRzvIpeo",
+        "routesTo": "Geek",
+        "webhook": "/webhook/telegram/geek",
+        "status": "TOKEN_INVALID (401 Unauthorized)"
+      },
+      "swen": {
+        "bot": "@RobSwenBot",
+        "token": "8298197929:AAE_xRmtI-4e5MZ4EyECbso59xpAp1tkGbU",
+        "routesTo": "Swen",
+        "webhook": "/webhook/telegram/swen",
+        "status": "WEBHOOK_FAILED (host resolution)"
+      },
+      "madison": {
+        "bot": "@RobMadisonBot",
+        "token": "8638428085:AAHwXyQzEOyoIgsUNjSKO1I9xq7OojFZr_g",
+        "routesTo": "Madison",
+        "webhook": "/webhook/telegram/madison",
+        "status": "TOKEN_INVALID (401 Unauthorized)"
+      }
+    }
+  },
+  "bindings": [
+    {
+      "agentId": "main",
+      "channel": "telegram",
+      "accountId": "default",
+      "userId": "1590967509"
+    },
+    {
+      "agentId": "geek",
+      "channel": "telegram",
+      "accountId": "geek",
+      "userId": "1590967509"
+    },
+    {
+      "agentId": "swen",
+      "channel": "telegram",
+      "accountId": "swen",
+      "userId": "1590967509"
+    },
+    {
+      "agentId": "madison",
+      "channel": "telegram",
+      "accountId": "madison",
+      "userId": "1590967509"
+    }
+  ],
+  "issues": [
+    "Geek token is invalid (401 Unauthorized) - may need regeneration from @BotFather",
+    "Madison token is invalid (401 Unauthorized) - may need regeneration from @BotFather",
+    "Swen webhook setup failed - network/webhook URL issue",
+    "Sub-bots not receiving messages because webhooks aren't properly registered"
+  ]
+}
