@@ -5,6 +5,7 @@ client_secret.json
 **/accounts.json
 **/*secret*.json
 **/*token*.json
+**/service-account*.json
 
 # API Keys
 *.key
